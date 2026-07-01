@@ -9,7 +9,7 @@ define('DB_HOST', 'sql300.infinityfree.com');  // Vérifiez et remplacez si néc
 define('DB_PORT', '3306');
 define('DB_NAME', 'if0_42314164_colis');
 define('DB_USER', 'if0_42314164');
-define('DB_PASS', 'VOTRE_MOT_DE_PASSE');  // Remplacez par votre mot de passe MySQL
+define('DB_PASS', 'Colis@2026');  // Remplacez par votre mot de passe MySQL
 
 // Identifiants admin pour l'API
 define('ADMIN_USER', 'admin');
