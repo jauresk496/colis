@@ -1,0 +1,206 @@
+<div class="livreur-container">
+  <!-- Livreur Selection -->
+  <div *ngIf="showLivreurSelection()" class="livreur-selection">
+    <div class="selection-header">
+      <h1>Espace Livreur</h1>
+      <p>Veuillez sélectionner votre profil</p>
+    </div>
+    
+    <div class="livreurs-grid">
+      <div class="livreur-card" *ngFor="let livreur of livreursActifs()" (click)="selectLivreur(livreur)">
+        <div class="livreur-avatar">
+          <div class="avatar-circle">
+            {{ livreur.nom.charAt(0).toUpperCase() }}
+          </div>
+        </div>
+        <div class="livreur-info">
+          <h3>{{ livreur.nom }}</h3>
+          <p>{{ livreur.telephone }}</p>
+          <span class="status-badge bg-green-100 text-green-800">Actif</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Livreur Dashboard -->
+  <div *ngIf="!showLivreurSelection() && currentLivreur()" class="livreur-dashboard">
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="livreur-profile">
+          <div class="avatar-circle">
+            {{ currentLivreur()!.nom.charAt(0).toUpperCase() }}
+          </div>
+          <div class="profile-info">
+            <h1>{{ currentLivreur()!.nom }}</h1>
+            <p>{{ currentLivreur()!.telephone }}</p>
+          </div>
+        </div>
+        <button class="btn btn-secondary" (click)="changeLivreur()">
+          Changer de livreur
+        </button>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total</h3>
+          <span class="stat-number">{{ colisStats().total }}</span>
+        </div>
+        <div class="stat-card">
+          <h3>En cours</h3>
+          <span class="stat-number text-yellow">{{ colisStats().enCours }}</span>
+        </div>
+        <div class="stat-card">
+          <h3>Livrés</h3>
+          <span class="stat-number text-green">{{ colisStats().livres }}</span>
+        </div>
+        <div class="stat-card">
+          <h3>Échecs</h3>
+          <span class="stat-number text-red">{{ colisStats().echecs }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-main">
+      <div class="section-header">
+        <h2>Mes Colis à Livrer</h2>
+      </div>
+
+      <div class="filters-bar">
+        <input
+          type="text"
+          class="filter-input"
+          placeholder="Rechercher (suivi, destinataire, téléphone, adresse)"
+          [value]="colisSearch()"
+          (input)="colisSearch.set($any($event.target).value)"
+        />
+
+        <select
+          class="filter-select"
+          [value]="colisStatutFilter()"
+          (change)="colisStatutFilter.set($any($event.target).value)"
+        >
+          <option value="">Tous statuts</option>
+          <option value="recu">recu</option>
+          <option value="en_cours">en_cours</option>
+          <option value="livre">livre</option>
+          <option value="echec">echec</option>
+          <option value="retourne">retourne</option>
+        </select>
+
+        <select
+          class="filter-select"
+          [value]="colisSort()"
+          (change)="colisSort.set($any($event.target).value)"
+        >
+          <option value="date">Tri: date</option>
+          <option value="numero">Tri: numéro</option>
+          <option value="statut">Tri: statut</option>
+        </select>
+
+        <button class="btn btn-secondary btn-reset" (click)="resetFiltres()">
+          Réinitialiser
+        </button>
+      </div>
+
+      <div class="results-count" *ngIf="mesColis().length > 0">
+        {{ mesColisFiltres().length }} / {{ mesColis().length }} résultat(s)
+      </div>
+
+      <div class="colis-list">
+        <div class="colis-item" *ngFor="let colisItem of mesColisFiltres()" (click)="selectColis(colisItem)">
+          <div class="colis-header">
+            <span class="colis-number">{{ colisItem.numeroSuivi }}</span>
+            <span [class]="'status-badge ' + getStatutColor(colisItem.statut)">
+              {{ getStatutLabel(colisItem.statut) }}
+            </span>
+          </div>
+          
+          <div class="colis-info">
+            <p><strong>Destinataire:</strong> {{ colisItem.destinataire }}</p>
+            <p><strong>Adresse:</strong> {{ colisItem.adresse }}</p>
+            <p><strong>Téléphone:</strong> {{ colisItem.telephone }}</p>
+            <p><strong>Type:</strong> {{ colisItem.type === 'client' ? 'Client' : 'Fournisseur' }}</p>
+            <p><strong>Date réception:</strong> {{ formatDate(colisItem.dateReception) }}</p>
+          </div>
+          
+          <div class="colis-actions">
+            <button class="btn btn-sm" (click)="selectColis(colisItem); $event.stopPropagation()">
+              Gérer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="mesColis().length === 0" class="empty-state">
+        <p>Aucun colis assigné pour le moment.</p>
+      </div>
+
+      <div *ngIf="mesColis().length > 0 && mesColisFiltres().length === 0" class="empty-state">
+        <p>Aucun colis ne correspond aux filtres.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Colis Details Modal -->
+  <div *ngIf="selectedColis()" class="modal-overlay" (click)="selectedColis.set(null)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Gérer le Colis</h3>
+      
+      <div class="colis-details">
+        <p><strong>Numéro de suivi:</strong> {{ selectedColis()!.numeroSuivi }}</p>
+        <p><strong>Destinataire:</strong> {{ selectedColis()!.destinataire }}</p>
+        <p><strong>Téléphone:</strong> {{ selectedColis()!.telephone }}</p>
+        <p><strong>Adresse:</strong> {{ selectedColis()!.adresse }}</p>
+        <p><strong>Type:</strong> {{ selectedColis()!.type === 'client' ? 'Client' : 'Fournisseur' }}</p>
+        <p><strong>Statut actuel:</strong> 
+          <span [class]="'status-badge ' + getStatutColor(selectedColis()!.statut)">
+            {{ getStatutLabel(selectedColis()!.statut) }}
+          </span>
+        </p>
+        
+        <div class="status-update-section">
+          <h4>Mettre à jour le statut</h4>
+          <div class="status-buttons">
+            <button 
+              *ngIf="selectedColis()!.statut === 'en_cours'"
+              class="btn btn-success"
+              (click)="updateStatutColis(selectedColis()!.id, 'livre', 'Colis livré avec succès')"
+            >
+              ✓ Livré
+            </button>
+            <button 
+              *ngIf="selectedColis()!.statut === 'en_cours'"
+              class="btn btn-danger"
+              (click)="updateStatutColis(selectedColis()!.id, 'echec', 'Échec de livraison')"
+            >
+              ✗ Échec
+            </button>
+            <button 
+              *ngIf="selectedColis()!.statut === 'echec'"
+              class="btn btn-warning"
+              (click)="updateStatutColis(selectedColis()!.id, 'retourne', 'Colis retourné à l\'entrepôt')"
+            >
+              ↺ Retourner
+            </button>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <h4>Historique</h4>
+          <div class="history-timeline">
+            <div *ngFor="let entry of selectedColis()!.historique" class="history-item">
+              <span class="history-date">{{ formatDate(entry.date) }}</span>
+              <span class="history-status">{{ getStatutLabel(entry.statut) }}</span>
+              <span *ngIf="entry.commentaire" class="history-comment">{{ entry.commentaire }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="imprimerRecuColis(selectedColis()!)">Imprimer reçu</button>
+        <button class="btn btn-secondary" (click)="selectedColis.set(null)">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
