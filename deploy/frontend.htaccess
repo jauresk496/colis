@@ -1,0 +1,18 @@
+Options -MultiViews
+RewriteEngine On
+
+# Pass Authorization header to PHP (for API folder)
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+
+# Don't rewrite if request is for existing file or directory in htdocs root
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Don't rewrite API requests
+RewriteCond %{REQUEST_URI} ^/collis-api/
+RewriteRule ^ - [L]
+
+# SPA fallback: everything else goes to index.html
+RewriteRule ^ index.html [L]

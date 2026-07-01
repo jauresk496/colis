@@ -2,9 +2,6 @@
   command = "npx ng build && node scripts/set-api-url.js"
   publish = "dist/collis/browser"
 
-[build.environment]
-  API_URL = "https://colis.free.je/collis-api/api"
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
