@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
+import { API_URL } from '../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
@@ -10,7 +11,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  if (!req.url.startsWith('/api/')) {
+  if (!req.url.startsWith(API_URL + '/') && !req.url.startsWith('/api/')) {
     return next(req);
   }
 

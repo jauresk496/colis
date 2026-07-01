@@ -8,11 +8,16 @@ function db(): PDO {
         return $pdo;
     }
 
-    $host = getenv('DB_HOST') ?: '127.0.0.1';
-    $port = getenv('DB_PORT') ?: '3306';
-    $name = getenv('DB_NAME') ?: 'collis';
-    $user = getenv('DB_USER') ?: 'root';
-    $pass = getenv('DB_PASS') ?: '';
+    $configFile = __DIR__ . '/config.php';
+    if (file_exists($configFile)) {
+        require_once $configFile;
+    }
+
+    $host = defined('DB_HOST') ? DB_HOST : (getenv('DB_HOST') ?: '127.0.0.1');
+    $port = defined('DB_PORT') ? DB_PORT : (getenv('DB_PORT') ?: '3306');
+    $name = defined('DB_NAME') ? DB_NAME : (getenv('DB_NAME') ?: 'collis');
+    $user = defined('DB_USER') ? DB_USER : (getenv('DB_USER') ?: 'root');
+    $pass = defined('DB_PASS') ? DB_PASS : (getenv('DB_PASS') ?: '');
 
     $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
 

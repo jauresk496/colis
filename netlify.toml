@@ -1,5 +1,5 @@
 [build]
-  command = "npx ng build"
+  command = "npx ng build && node scripts/set-api-url.js"
   publish = "dist/collis/browser"
 
 [[redirects]]

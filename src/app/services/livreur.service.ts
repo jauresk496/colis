@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Livreur } from '../models';
 import { NotificationService } from './notification.service';
+import { API_URL } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class LivreurService {
 
   refresh(): void {
     this.loading.set(true);
-    this.http.get<any[]>('/api/livreurs').subscribe({
+    this.http.get<any[]>(`${API_URL}/livreurs`).subscribe({
       next: (rows) => {
         const mapped = (rows ?? []).map((l) => this.mapLivreurDto(l));
         this.livreursSignal.set(mapped);
@@ -49,7 +50,7 @@ export class LivreurService {
       colisAssignes: []
     };
 
-    this.http.post('/api/livreurs', {
+    this.http.post(`${API_URL}/livreurs`, {
       nom: nouveauLivreur.nom,
       telephone: nouveauLivreur.telephone,
       statut: nouveauLivreur.statut
@@ -70,7 +71,7 @@ export class LivreurService {
     if (livreurData.telephone !== undefined) payload.telephone = livreurData.telephone;
     if (livreurData.statut !== undefined) payload.statut = livreurData.statut;
 
-    this.http.patch(`/api/livreurs/${livreurId}`, payload).subscribe({
+    this.http.patch(`${API_URL}/livreurs/${livreurId}`, payload).subscribe({
       next: () => {
         this.refresh();
         this.notifications.success('Livreur mis à jour');
@@ -80,7 +81,7 @@ export class LivreurService {
   }
 
   deleteLivreur(livreurId: string): void {
-    this.http.delete(`/api/livreurs/${livreurId}`).subscribe({
+    this.http.delete(`${API_URL}/livreurs/${livreurId}`).subscribe({
       next: () => {
         this.refresh();
         this.notifications.success('Livreur supprimé');

@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Colis, HistoriqueColis } from '../models';
 import { NotificationService } from './notification.service';
+import { API_URL } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class ColisService {
 
   refresh(): void {
     this.loading.set(true);
-    this.http.get<any[]>('/api/colis').subscribe({
+    this.http.get<any[]>(`${API_URL}/colis`).subscribe({
       next: (rows) => {
         const mapped = (rows ?? []).map((c) => this.mapColisListDto(c));
         this.colisSignal.set(mapped);
@@ -34,7 +35,7 @@ export class ColisService {
   }
 
   fetchColisDetails(colisId: string) {
-    return this.http.get<any>(`/api/colis/${colisId}`);
+    return this.http.get<any>(`${API_URL}/colis/${colisId}`);
   }
 
   generateUUID(): string {
@@ -60,7 +61,7 @@ export class ColisService {
       type: colisData.type
     };
 
-    this.http.post('/api/colis', payload).subscribe({
+    this.http.post(`${API_URL}/colis`, payload).subscribe({
       next: () => {
         this.refresh();
         this.notifications.success('Colis créé avec succès');
@@ -70,7 +71,7 @@ export class ColisService {
   }
 
   updateStatutColis(colisId: string, nouveauStatut: Colis['statut'], commentaire?: string, livreurId?: string): void {
-    this.http.post(`/api/colis/${colisId}/status`, {
+    this.http.post(`${API_URL}/colis/${colisId}/status`, {
       statut: nouveauStatut,
       commentaire,
       livreurId
@@ -84,7 +85,7 @@ export class ColisService {
   }
 
   assignerLivreur(colisId: string, livreurId: string): void {
-    this.http.post(`/api/colis/${colisId}/assign`, { livreurId }).subscribe({
+    this.http.post(`${API_URL}/colis/${colisId}/assign`, { livreurId }).subscribe({
       next: () => {
         this.refresh();
         this.notifications.success('Livreur assigné avec succès');
@@ -113,7 +114,7 @@ export class ColisService {
   }
 
   deleteColis(colisId: string): void {
-    this.http.delete(`/api/colis/${colisId}`).subscribe({
+    this.http.delete(`${API_URL}/colis/${colisId}`).subscribe({
       next: () => {
         this.refresh();
         this.notifications.success('Colis supprimé');

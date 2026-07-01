@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpParams } from '@angular/common/http';
 import { map, tap } from 'rxjs/operators';
+import { API_URL } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +36,7 @@ export class AuthService {
       .set('username', username)
       .set('password', password);
 
-    return this.http.post<{ token: string }>('/api/auth/login', body.toString(), {
+    return this.http.post<{ token: string }>(`${API_URL}/auth/login`, body.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).pipe(
       tap((res) => this.setToken(res.token))
@@ -47,7 +48,7 @@ export class AuthService {
   }
 
   me() {
-    return this.http.get<{ user: string | null; role: string | null; exp: number | null }>('/api/auth/me').pipe(
+    return this.http.get<{ user: string | null; role: string | null; exp: number | null }>(`${API_URL}/auth/me`).pipe(
       map((x) => x)
     );
   }
